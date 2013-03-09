@@ -3,6 +3,9 @@ class PowerManager(object):
 
 	id = "power_manager"
 	
-	def run(args):
+	def run(callback,args):
+		#args is a dictionary of commands and data
 		print args
-		#args is a dictionary
+		#When complete run the callback so that we can notify whoever asked what happened		
+		callback(completion_code)
+	
