@@ -1,10 +1,22 @@
 from PowerManager import PowerManager
 from Messager import *
 from twisted.internet import protocol, reactor
+import json
+
+def getPlugin(name):
+	print name
+	if name == Messager.id:
+		return Messager()
+	else:
+		return None
 
 class PluginResponse(protocol.Protocol):
     def dataReceived(self, data):
-		print data
+		d = json.loads(data)
+		print d
+		pluginName = d.keys()[0]
+		p = getPlugin(pluginName)
+		p.run(callback,d[pluginName])
         #self.transport.write(data)
 
 class PluginListenerFactory(protocol.Factory):

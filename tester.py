@@ -1,5 +1,6 @@
 import socket
 import sys
+import json
  
 HOST = 'localhost'
 PORT = 22001
@@ -22,16 +23,15 @@ print "--------------"
 print
 k,v = raw_input(),raw_input()
 
-message = "<plugin name=\"%s\">" % (p)
+params = {}
+
 while True:
 	if k == "quit":
 		break
-	message += "<param key=\"%s\">%s</param>" % (k,v)
+	params[k] = v
 	k,v = raw_input(),raw_input()
-message += "</plugin>"
-sock.send(message)
+sock.send(json.dumps({p:params}))
 sock.close()
- 
-print string
+
  
 sys.exit(0)
