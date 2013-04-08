@@ -3,6 +3,7 @@ from Tkinter import *
 import tkMessageBox
 
 
+
 class Messager(Plugin):
 	'''Allows messages to be recieved and displayed to the current user'''
 
