@@ -1,4 +1,4 @@
-import Plugin
+from Plugin import Plugin
 
 class PowerManager(Plugin):
 	'''The first example class for the python powered remote interface for my computer'''
@@ -12,5 +12,5 @@ class PowerManager(Plugin):
 		#args is a dictionary of commands and data
 		print args
 		#When complete run the callback so that we can notify whoever asked what happened		
-		callback(self,0,"Message")
+		callback(self,0,{"1":"Message 1","2":"Message 2"})
 	

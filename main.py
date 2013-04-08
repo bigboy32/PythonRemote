@@ -1,9 +1,9 @@
-import PowerManager
+from PowerManager import PowerManager
 
-def callback(plugin,code,message):
+def callback(plugin,code,values):
 	print plugin
 	print code
-	print message
+	print values
 
 def main():
 	p = PowerManager()
