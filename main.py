@@ -1,4 +1,5 @@
 from PowerManager import PowerManager
+from Messager import *
 
 def callback(plugin,code,values):
 	print plugin
@@ -6,8 +7,9 @@ def callback(plugin,code,values):
 	print values
 
 def main():
-	p = PowerManager()
-	p.run(callback,{'A':'Hello',2:'World'})
+	p = Messager()
+	print p.getOS()
+	p.run(callback,{'type':'okcancel','title':'Message Title','message':'Hello World'})
 
 
 
