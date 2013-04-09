@@ -15,7 +15,7 @@ class Messager(Plugin):
 	def run(self,callback,args):
 		#Arguments should have a 'type' key which can be any of:
 		# 'abortretryignore','ok','okcancel','retrycancel','yesno','yesnocancel'
-		if self.os in ["Windows"]:
+		if self.os in ["Windows","Darwin"]:
 			window = Tk()
 			window.wm_withdraw()
 			#center the window on the main screen
@@ -23,5 +23,5 @@ class Messager(Plugin):
 			answer = tkMessageBox._show(type=args['type'],title=args['title'], message=args['message'],icon=None,)
 			callback(self,0,{'answer':answer})
 		else:
-			sys.stderr.write('Unsupported OS for plugin "Messager"')
+			sys.stderr.write('Unsupported OS for plugin "Messager"\n')
 	
