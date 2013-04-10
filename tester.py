@@ -18,7 +18,7 @@ except socket.error, msg:
   sys.exit(2)
 
 print "Enter plugin name: ",
-p = raw_input()
+p = {'name':raw_input(),'type':'sync'}
 print "--------------"
 print
 k,v = raw_input(),raw_input()
@@ -30,7 +30,10 @@ while True:
 		break
 	params[k] = v
 	k,v = raw_input(),raw_input()
-sock.send(json.dumps({p:params}))
+p['data'] = params
+sock.send(json.dumps(p))
+#sock.send(json.dumps({'name':'quit'}))
+
 sock.close()
 
  
