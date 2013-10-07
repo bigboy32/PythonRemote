@@ -6,10 +6,13 @@ import sys
 
 def getPlugin(name):
 	print name
+	#TODO: Load this in dynamically
 	if name == 'quit':
 		sys.exit(0)
 	elif name == Messager.id:
 		return Messager()
+	elif name == PowerManager.id:
+	    return PowerManager()
 	else:
 		return None
 
