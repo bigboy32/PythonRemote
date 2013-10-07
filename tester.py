@@ -1,7 +1,9 @@
 import socket
 import sys
 import json
- 
+
+#This can be emulated with: echo '{"name":"power_manager","type":"sync","data":{"option":"sleep"}}' | nc localhost 22001
+
 HOST = 'localhost'
 PORT = 22001
  

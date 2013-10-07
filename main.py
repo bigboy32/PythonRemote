@@ -41,9 +41,6 @@ def callback(plugin,code,values):
 def main():
 	reactor.listenTCP(22001, PluginListenerFactory())
 	reactor.run()
-	#p = Messager()
-	#print p.getOS()
-	#p.run(callback,{'type':'okcancel','title':'Message Title','message':'Hello World'})
 
 
 
