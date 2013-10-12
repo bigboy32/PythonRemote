@@ -28,10 +28,10 @@ k,v = raw_input(),raw_input()
 params = {}
 
 while True:
-	if k == "quit":
-		break
-	params[k] = v
-	k,v = raw_input(),raw_input()
+    if k == "quit":
+        break
+    params[k] = v
+    k,v = raw_input(),raw_input()
 p['data'] = params
 sock.send(json.dumps(p))
 #sock.send(json.dumps({'name':'quit'}))

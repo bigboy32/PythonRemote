@@ -1,6 +1,6 @@
 import platform
 
-class Plugin(object):
+class Listener(object):
 
     #Possible OS types:
         #Windows
