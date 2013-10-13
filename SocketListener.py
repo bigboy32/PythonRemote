@@ -18,14 +18,24 @@ class PluginListenerFactory(protocol.Factory):
 
 
 class SocketListener(Listener):
-
+    '''An implementation of the listener class which listens for data on a single socket.'''
+    
     def __init__(self):
         Listener.__init__(self)
+        
+    def sendResponse(self, response):
+        print 
+        print
+        print "SENDING RESPONSE: ",
+        print response
         
     def run(self, connectionFormed, commandReceived):
         PluginResponse.commandReceived = commandReceived
         PluginResponse.connectionFormed = connectionFormed
         reactor.listenTCP(22001, PluginListenerFactory())
         reactor.run()
+        
+    def quit(self):
+        reactor.stop()
         
 

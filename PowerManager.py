@@ -1,5 +1,4 @@
-from Plugin import Plugin
-import os
+from Plugin import *
 
 class PowerManager(Plugin):
     '''The first example class for the python powered remote interface for my computer'''

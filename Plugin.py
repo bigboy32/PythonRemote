@@ -1,13 +1,7 @@
-import platform
+from SystemInfo import SystemInfo
 
 class Plugin(object):
-
-    #Possible OS types:
-        #Windows
-        #
-
-    def __init__(self):
-        self.os = platform.system()
-
-    def getOS(self):
-        return self.os
+    '''A base class for Plugin objects'''
+    
+    def run(self, callback, arguements):
+        raise NotImplementedError("Not Implemented")

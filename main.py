@@ -5,6 +5,7 @@ import json
 import sys
 
 def getPlugin(name):
+    '''Returns an instance of the plugin specified by the name passed in'''
     print name
     #TODO: Load this in dynamically
     if name == 'quit':
@@ -17,26 +18,35 @@ def getPlugin(name):
         return None
 
 def commandReceived(self, data):
+    '''Called when a command is received. It parses the json and calls the correct plugin passing in the data.'''
+    global listener
     print data
     d = json.loads(data)
     print d
     pluginName = d['name']
-    p = getPlugin(pluginName)
-    p.run(callback,d['data'])
-    #self.transport.write(data)
+    if(pluginName == "system"):
+        if d['data']['message'] == "quit":
+            listener.quit()
+    else:
+        p = getPlugin(pluginName)
+        p.run(callback,d['data'])
         
 def connectionFormed(self):
+    '''Called when a new connection is formed.'''
     #TODO: I have self because a class passes self back into the method...
     print "Client connection"
 
 
 def callback(plugin,code,values):
-    print plugin
-    print code
-    print values
+    '''The callback method provided to the plugin so that the response can be issued.'''
+    global listener
+    listener.sendResponse({"plugin":plugin.id,"code":code,"values":values})
 
+listener = None
+    
 def main():
-    listener = None
+    '''Main method which loads a listener and starts it'''
+    global listener
     if(len(sys.argv) > 1):
         print 'has arg'
         if(sys.argv[1] == 'socket'):
@@ -49,6 +59,7 @@ def main():
         print 'no arg'
         listener = SocketListener()
     listener.run(connectionFormed,commandReceived)
+    print "Quitting"
 
 
 

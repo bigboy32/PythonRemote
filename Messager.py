@@ -1,4 +1,4 @@
-from Plugin import Plugin
+from Plugin import *
 from Tkinter import *
 import tkMessageBox
 
@@ -13,9 +13,10 @@ class Messager(Plugin):
         Plugin.__init__(self)
 
     def run(self,callback,args):
+        #TODO: Support linux
         #Arguments should have a 'type' key which can be any of:
         # 'abortretryignore','ok','okcancel','retrycancel','yesno','yesnocancel'
-        if self.os in ["Windows","Darwin"]:
+        if SystemInfo.getOS() in ["Windows","Darwin"]:
             window = Tk()
             window.wm_withdraw()
             #center the window on the main screen
