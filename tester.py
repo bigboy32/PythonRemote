@@ -1,6 +1,7 @@
 import socket
 import sys
 import json
+import time
 
 #This can be emulated with: echo '{"name":"power_manager","type":"sync","data":{"option":"sleep"}}' | nc localhost 22001
 
@@ -23,6 +24,9 @@ except socket.error, msg:
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
     p = {'name':'messager','type':'sync'}
     p['data'] = {'title':'test title', 'message':'This is a test message', 'type':'ok'}
+    sock.send(json.dumps(p))
+    time.sleep(0.2)
+    p = {'name':'quit','type':'sync'}
 else :
     print "Enter plugin name: ",
     p = {'name':raw_input(),'type':'sync'}

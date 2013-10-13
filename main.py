@@ -20,22 +20,20 @@ def package_contents(package_name):
 def getPlugin(name):
     '''Returns an instance of the plugin specified by the name passed in'''
     
+    global listener
     if name == 'quit':
-        sys.exit(0)
+        listener.quit()
+        return None
     
     plugin = None
     
     print name
     for k,v in globals().iteritems():
         if inspect.isclass(v) and type(v) == type:
-            if issubclass(v,Plugin):
-                try:
-                    if v.id == name:
-                        plugin = v()
-                        break
-                except:
-                    #This just means we have hit the plugin class since we didn't exclude it
-                    pass
+            if issubclass(v,Plugin) and Plugin != v:
+                if v.id == name:
+                    plugin = v()
+                    break
     return plugin
 
 def commandReceived(self, jsondata):
@@ -46,7 +44,8 @@ def commandReceived(self, jsondata):
     print data
     pluginName = data['name']
     plugin = getPlugin(pluginName)
-    plugin.run(callback,data['data'])
+    if plugin != None:
+        plugin.run(callback,data['data'])
         
 def connectionFormed(self):
     '''Called when a new connection is formed.'''
