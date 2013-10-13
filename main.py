@@ -16,11 +16,9 @@ def getPlugin(name):
     
     print name
     for k,v in globals().iteritems():
-        if inspect.isclass(v):
-            if issubclass(v,Plugin) and Plugin != v:
-                if v.id == name:
-                    plugin = v()
-                    break
+        if inspect.isclass(v) and issubclass(v,Plugin) and Plugin != v and v.id == name:
+            plugin = v()
+            break
     return plugin
 
 def commandReceived(self, jsondata):
