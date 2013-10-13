@@ -29,7 +29,7 @@ def getPlugin(name):
     
     print name
     for k,v in globals().iteritems():
-        if inspect.isclass(v) and type(v) == type:
+        if inspect.isclass(v):
             if issubclass(v,Plugin) and Plugin != v:
                 if v.id == name:
                     plugin = v()
