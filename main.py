@@ -1,6 +1,5 @@
-from PowerManager import PowerManager
-from SocketListener import *
-from Messager import *
+from Plugins import *
+from Listeners import *
 import json
 import sys
 
