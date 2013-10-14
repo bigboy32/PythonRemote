@@ -33,11 +33,6 @@ Requests will be checked for X seconds before and after the sever time.
 
 What value should X be?
 
-###Notes
-
-* With this method only one device will be able to control the server.
-* Should I use a nonce instead of a timestamp to defeat replay attacks? It means the client will have to issue a nonce request before each command.
-
 ##Dependencies
 
 * [Twisted](http://twistedmatrix.com/trac/wiki/Downloads)
