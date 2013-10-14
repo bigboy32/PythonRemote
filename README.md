@@ -25,9 +25,9 @@ The app decrypts the data with its private key, and stores this as an auth token
 
 From here all requests must use this token until it expires. Requests will be of the form:
 
-`{'token':calculate_token,'nonce':'sha(base_64_token + unixtime)','name':'messager','type':'sync'}`
+`{'token':calculated_token,'name':'messager','type':'sync'}`
 
-The calculate_token is `private_encrypt(auth_token + unixtime)`
+The calculated_token is `private_encrypt(auth_token + unixtime)`
 
 Requests will be checked for X seconds before and after the sever time.
 
