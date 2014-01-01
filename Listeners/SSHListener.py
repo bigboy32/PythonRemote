@@ -34,7 +34,7 @@ class ParamikoServer(paramiko.ServerInterface):
 
     def check_auth_publickey(self, username, key):
         print 'Auth attempt with key: ' + hexlify(key.get_fingerprint())
-        if (username == 'robey') and (key == self.publickey):
+        if (username == self.username) and (key == self.publickey):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
@@ -59,7 +59,7 @@ class SSHListener(Listener):
         Logger().info("Responding")
         
     def run(self, connectionFormed, commandReceived):
-        privatekey = paramiko.RSAKey(filename='remote')
+        privatekey = paramiko.RSAKey(filename='remote.key')
         Logger().info('Read key: ' + hexlify(privatekey.get_fingerprint()))
 
         # now connect
