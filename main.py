@@ -1,5 +1,6 @@
 from Plugins import *
 from Listeners import *
+from Utilities import *
 import json
 import sys
 import inspect
@@ -14,7 +15,7 @@ def getPlugin(name):
     
     plugin = None
     
-    print name
+    Logger().info("Plugin name:" + name)
     for k,v in globals().iteritems():
         if inspect.isclass(v):
             if issubclass(v,Plugin) and Plugin != v:
@@ -26,9 +27,9 @@ def getPlugin(name):
 def commandReceived(self, jsondata):
     '''Called when a command is received. It parses the json and calls the correct plugin passing in the data.'''
     global listener
-    print jsondata
+    Logger().info("JSON RECEIVED: " + str(jsondata))
     data = json.loads(jsondata)
-    print data
+    Logger().info("PARSED DATA: " + str(data))
     pluginName = data['name']
     plugin = getPlugin(pluginName)
     if plugin != None:
@@ -37,7 +38,7 @@ def commandReceived(self, jsondata):
 def connectionFormed(self):
     '''Called when a new connection is formed.'''
     #TODO: I have self because a class passes self back into the method...
-    print "Client connection"
+    Logger().info("Client connection")
 
 
 def callback(plugin,code,values):
@@ -51,22 +52,29 @@ def main():
     '''Main method which loads a listener and starts it'''
     global listener
     if(len(sys.argv) > 1):
-        print 'has arg'
         if(sys.argv[1] == 'socket'):
-            print 'arg is socket'
+            Logger().info('Creating SocketListener()')
             listener = SocketListener()
+        elif(sys.argv[1] == 'ssh'):
+            Logger().info('Creating SSHListener()')
+            listener = SSHListener()
         else:
-            print 'No listener specified'
+            Logger().error('No listener specified')
             sys.exit(0)
     else:
-        print 'no arg'
+        Logger().warning('No arguement specified, defaulting to SocketListener()')
         listener = SocketListener()
-    listener.run(connectionFormed,commandReceived)
-    print "Quitting"
-
-
-
-
+    while(True):
+        #We want this to start running again
+        try:
+            Logger().info("Running listener")
+            listener.run(connectionFormed,commandReceived)
+            Logger().info("Listener completed its task. Running again.")
+        except Exception,e:
+            Logger().error('Listener failed: ' + str(e))
+            traceback.print_exc()
+    #And so the main code ends....
+    
 if __name__ == '__main__':
      main() 
 

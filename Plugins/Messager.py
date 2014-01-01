@@ -24,5 +24,5 @@ class Messager(Plugin):
             answer = tkMessageBox._show(type=args['type'],title=args['title'], message=args['message'],icon=None,)
             callback(self,0,{'answer':answer})
         else:
-            sys.stderr.write('Unsupported OS for plugin "Messager"\n')
+            Logger().critical('Unsupported OS')
     

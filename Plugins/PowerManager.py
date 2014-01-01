@@ -11,7 +11,7 @@ class PowerManager(Plugin):
     def run(self,callback,args):
         #args is a dictionary of commands and data
         #We can't do the callback after it is asleep/shutdown/etc.
-        callback(self,0,{"answer":"Message recieved. Taking action...."})
+        callback(self,0,{"answer":"Message received. Taking action...."})
         
         if args['option'] == 'sleep':
             os.system("osascript -e 'tell application \"System Events\" to sleep'")

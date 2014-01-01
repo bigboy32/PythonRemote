@@ -1,5 +1,6 @@
 from Listener import Listener
 from twisted.internet import protocol, reactor
+from Utilities import *
 
 class PluginResponse(protocol.Protocol):
     
@@ -24,10 +25,7 @@ class SocketListener(Listener):
         Listener.__init__(self)
         
     def sendResponse(self, response):
-        print 
-        print
-        print "SENDING RESPONSE: ",
-        print response
+        Logger().info("SENDING RESPONSE: " + str(response))
         
     def run(self, connectionFormed, commandReceived):
         PluginResponse.commandReceived = commandReceived
