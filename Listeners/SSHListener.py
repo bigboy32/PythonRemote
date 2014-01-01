@@ -54,15 +54,15 @@ class SSHListener(Listener):
     
     def __init__(self):
         Listener.__init__(self)
+        self.privatekey = paramiko.RSAKey(filename='remote.key')
+        Logger().info('Read key: ' + hexlify(self.privatekey.get_fingerprint()))
     
     def sendResponse(self, response):
         Logger().info("Responding")
+        self.chan.send(str(response))
         
     def run(self, connectionFormed, commandReceived):
-        privatekey = paramiko.RSAKey(filename='remote.key')
-        Logger().info('Read key: ' + hexlify(privatekey.get_fingerprint()))
 
-        # now connect
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -91,7 +91,7 @@ class SSHListener(Listener):
             except:
                 Logger().error('Failed to load moduli -- gex will be unsupported.')
                 raise
-            self.transport.add_server_key(privatekey)
+            self.transport.add_server_key(self.privatekey)
             server = ParamikoServer()
             try:
                 self.transport.start_server(server=server)
