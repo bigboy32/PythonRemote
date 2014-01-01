@@ -18,3 +18,4 @@ Every device will be authenticated using the pairing method as above. The connec
 ##Dependencies
 
 * [Twisted](http://twistedmatrix.com/trac/wiki/Downloads)
+* [Paramiko](http://www.lag.net/paramiko/)
