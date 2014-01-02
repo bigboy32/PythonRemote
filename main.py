@@ -46,27 +46,32 @@ def commandReceived(self, jsondata):
     except Exception, e:
         Logger().error("Invalid JSON string: " + jsondata)
         #No point in going any further
+        callback("",2,{"error":"Invalid JSON string"})
         return
     Logger().info("Parsed: " + str(data))
+    if 'type' not in data.keys():
+        Logger().warning("No 'type' key was found in the command. Assuming sync")
+        data['type'] = 'sync'
     if not valid_json(data):
         Logger().error("Command was not valid")
+        callback("",2,{"error":"Invalid JSON string"})
         return
-    if 'type' not in json.keys():
-        Logger().warning("No 'type' key was found in the command. Assuming sync")
-        json['type'] = 'sync'
     
     try:
         pluginName = data['name']
         plugin = getPlugin(pluginName)
     except Exception, e:
         Logger().error("Unable to get plugin")
+        callback("",3,{"error":"Plugin not found"})
         return
     if plugin != None:
         try:
             plugin.run(callback,data['data'])
         except Exception, e:
+            callback("",4,{"error":str(e.__class__) + ": " + str(e)})
             Logger().error("Plugin run failed: " + str(e.__class__) + ': ' + str(e))
     else:
+        callback("",3,{"error":"Plugin not found"})
         Logger().error("Plugin '" + pluginName + "' not found")
         
 def connectionFormed(self):
@@ -81,6 +86,11 @@ def callback(plugin,code,values):
     #For the code, it is plugin specific, however it is recommended to use the following:
     #0 - Command successful
     #1 - Unsupported command
+    #2 - Invalid command
+    #3 - Plugin not found
+    #4 - Command unsuccessful
+    if values == None:
+        values = ""
     listener.sendResponse({"plugin":plugin.id,"code":code,"values":values})
 
 listener = None
