@@ -39,6 +39,7 @@ class ParamikoServer(paramiko.ServerInterface):
         return paramiko.AUTH_FAILED
 
     def get_allowed_auths(self, username):
+        #TODO: Probably limit this to public key only. Password is useful for testing
         return 'password,publickey'
 
     def check_channel_shell_request(self, channel):
@@ -60,9 +61,8 @@ class SSHListener(Listener):
     def sendResponse(self, response):
         Logger().info("Responding")
         self.chan.send(str(response))
-        
-    def run(self, connectionFormed, commandReceived):
-
+    
+    def initiate_connection(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -75,29 +75,34 @@ class SSHListener(Listener):
         try:
             self.sock.listen(100)
             Logger().info('Listening for connection')
-            client, addr = self.sock.accept()
+            self.client, self.addr = self.sock.accept()
         except Exception, e:
             Logger().error('Listen/accept failed: ' + str(e))
             traceback.print_exc()
             raise
-        
-        
-        connectionFormed(self)
+    
+    def setup_transport(self):
+        self.transport = paramiko.Transport(self.client)
+        try:
+            self.transport.load_server_moduli()
+        except:
+            Logger().error('Failed to load moduli -- gex will be unsupported.')
+            raise
+        self.transport.add_server_key(self.privatekey)
+        self.server = ParamikoServer()
+        try:
+            self.transport.start_server(server=self.server)
+        except paramiko.SSHException, x:
+            Logger().error('SSH negotiation failed.')
+            raise
+    
+    def run(self, connection_formed, command_received):
+
+        self.initiate_connection()
+        connection_formed(self)
 
         try:
-            self.transport = paramiko.Transport(client)
-            try:
-                self.transport.load_server_moduli()
-            except:
-                Logger().error('Failed to load moduli -- gex will be unsupported.')
-                raise
-            self.transport.add_server_key(self.privatekey)
-            server = ParamikoServer()
-            try:
-                self.transport.start_server(server=server)
-            except paramiko.SSHException, x:
-                Logger().error('SSH negotiation failed.')
-                sys.exit(1)
+            self.setup_transport()
 
             # wait for auth
             self.chan = self.transport.accept(20)
@@ -107,16 +112,16 @@ class SSHListener(Listener):
             
             Logger().info('Authenticated!')
 
-            server.event.wait(10)
+            self.server.event.wait(10)
 
-            self.chan.send('You are connected to the server. Send your commands.\r\n')
+            #self.chan.send('You are connected to the server. Send your commands.\r\n')
             command = ''
             f = self.chan.makefile('rU')
             while(True):
-                command = f.readline().strip('\r\n')
-                if command == 'quit':
+                command = f.readline().strip('\r').strip('\n')
+                if command == 'quit' or command == '':
                     break
-                commandReceived(self,command)
+                command_received(self,command)
                 self.chan.send("Received command\r\n")
             self.chan.close()
 
