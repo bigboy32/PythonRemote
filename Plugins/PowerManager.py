@@ -13,26 +13,44 @@ class PowerManager(Plugin):
     def run(self,callback,args):
         #args is a dictionary of commands and data
         
-        if args['option'] in ['sleep','hibernate']:
-            if SystemInfo.is_mac():
+        if SystemInfo.is_mac():
+            if args['option'] in ['sleep','hibernate']:
                 callback(self,0,None)
                 os.system("osascript -e 'tell application \"System Events\" to sleep'")
-            elif SystemInfo.is_windows():
-                callback(self,0,None)
-                os.system(r'%windir%\system32\rundll32.exe powrprof.dll,SetSuspendState Hibernate')
             else:
                 callback(self,1,None)
-                Logger().error("Unsupported OS for command 'sleep'")
-        elif args['option'] == 'shutdown':
-            callback(self,1,None)
-            Logger().error("Shutdown not yet implemented")
-            raise NotImplementedError("Not Implemented")
-        elif args['option'] == 'restart':
-            callback(self,1,None)
-            Logger().error("Restart not yet implemented")
-            raise NotImplementedError("Not Implemented")
-        else:
+                Logger().error("Unsupported command: " + args['option'])
+                raise NotImplementedError("Not Implemented")
+                
+                
+        elif SystemInfo.is_windows():
+            if args['option'] in ['sleep','hibernate']:
+                callback(self,0,None)
+                os.system(r'%windir%\system32\rundll32.exe powrprof.dll,SetSuspendState Hibernate')
+            elif args['option'] == 'shutdown':
+                callback(self,0,None)
+                os.system(r'%windir%\system32\rundll32.exe shell32.dll,SHExitWindowsEx 4')
+            elif args['option'] == 'restart':
+                callback(self,0,None)
+                os.system(r'%windir%\system32\rundll32.exe shell32.dll,SHExitWindowsEx 2')
+            elif args['option'] == 'logoff':
+                callback(self,0,None)
+                os.system(r'%windir%\system32\rundll32.exe shell32.dll,SHExitWindowsEx 0')
+            elif args['option'] == 'lock':
+                callback(self,0,None)
+                os.system(r'%windir%\System32\rundll32.exe user32.dll,LockWorkStation')
+            else:
+                callback(self,1,None)
+                Logger().error("Unsupported command: " + args['option'])
+                raise NotImplementedError("Not Implemented")
+                
+                
+        elif SystemInfo.is_linux():
             callback(self,1,None)
             Logger().error("Unsupported command '" + args['option'] + "'")
+            
+            
+        else:
+            callback(self,1,None)
+            Logger().error("Unsupported operating system")
         
-    
