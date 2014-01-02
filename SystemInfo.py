@@ -4,7 +4,7 @@ class SystemInfo(object):
     '''A class for easily accessing all system information'''
     
     @staticmethod
-    def getOS():
+    def get_OS():
         return platform.system()
     
     @staticmethod

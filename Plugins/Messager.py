@@ -16,7 +16,7 @@ class Messager(Plugin):
         #TODO: Support linux
         #Arguments should have a 'type' key which can be any of:
         # 'abortretryignore','ok','okcancel','retrycancel','yesno','yesnocancel'
-        if SystemInfo.getOS() in ["Windows","Darwin"]:
+        if SystemInfo.get_OS() in ["Windows","Darwin"]:
             window = Tk()
             window.wm_withdraw()
             #center the window on the main screen
