@@ -13,7 +13,7 @@ class PowerManager(Plugin):
         #args is a dictionary of commands and data
         
         if args['option'] == 'sleep':
-            if SystemInfo.isMac():
+            if SystemInfo.is_mac():
                 callback(self,0,{"answer":"Message received. Sleeping..."})
                 os.system("osascript -e 'tell application \"System Events\" to sleep'")
             else:

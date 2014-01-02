@@ -8,14 +8,14 @@ class SystemInfo(object):
         return platform.system()
     
     @staticmethod
-    def isWindows():
+    def is_windows():
         return SystemInfo.getOS() == "Windows"
     
     @staticmethod
-    def isMac():
+    def is_mac():
         return SystemInfo.getOS() == "Darwin"
     
     @staticmethod
-    def isLinux():
+    def is_linux():
         return SystemInfo.getOS() == "Linux"
     
