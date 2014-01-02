@@ -17,7 +17,7 @@ class PowerManager(Plugin):
                 callback(self,0,{"answer":"Message received. Sleeping..."})
                 os.system("osascript -e 'tell application \"System Events\" to sleep'")
             else:
-                callback(self,2,{"answer":"Message received. Unsupported OS"})
+                callback(self,1,{"answer":"Message received. Unsupported OS"})
                 Logger().error("Unsupported OS for command 'sleep'")
         elif args['option'] == 'shutdown':
             callback(self,1,{"answer":"Message received. Unsupported command"})

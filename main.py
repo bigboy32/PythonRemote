@@ -76,6 +76,9 @@ def connectionFormed(self):
 def callback(plugin,code,values):
     '''The callback method provided to the plugin so that the response can be issued.'''
     global listener
+    #For the code, it is plugin specific, however it is recommended to use the following:
+    #0 - Command successful
+    #1 - Unsupported command
     listener.sendResponse({"plugin":plugin.id,"code":code,"values":values})
 
 listener = None
@@ -97,7 +100,7 @@ def main():
         Logger().warning('No arguement specified, defaulting to SSHListener()')
         listener = SSHListener()
     while(True):
-        #We want this to start running again
+        #We want this to start running again should it fail
         try:
             Logger().info("Running listener")
             listener.run(connectionFormed,commandReceived)

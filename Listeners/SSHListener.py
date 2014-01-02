@@ -135,5 +135,10 @@ class SSHListener(Listener):
             raise
         
     def quit(self):
+        try:
+            self.chan.close()
+            self.transport.close()
+        except:
+            pass
         Logger().info("quitting")
         
