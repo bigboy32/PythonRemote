@@ -51,7 +51,6 @@ def commandReceived(self, jsondata):
     if not valid_json(data):
         Logger().error("Command was not valid")
         return
-    
     if 'type' not in json.keys():
         Logger().warning("No 'type' key was found in the command. Assuming sync")
         json['type'] = 'sync'
@@ -63,7 +62,10 @@ def commandReceived(self, jsondata):
         Logger().error("Unable to get plugin")
         return
     if plugin != None:
-        plugin.run(callback,data['data'])
+        try:
+            plugin.run(callback,data['data'])
+        except Exception, e:
+            Logger().error("Plugin run failed: " + str(e.__class__) + ': ' + str(e))
     else:
         Logger().error("Plugin '" + pluginName + "' not found")
         
@@ -94,10 +96,10 @@ def main():
             Logger().info('Creating SSHListener()')
             listener = SSHListener()
         else:
-            Logger().error('No listener specified')
-            sys.exit(0)
+            Logger().error('Invalid listener. Quitting.')
+            sys.exit(1)
     else:
-        Logger().warning('No arguement specified, defaulting to SSHListener()')
+        Logger().warning('No argument specified, defaulting to SSHListener()')
         listener = SSHListener()
     while(True):
         #We want this to start running again should it fail
