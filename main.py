@@ -22,16 +22,50 @@ def getPlugin(name):
             break
     return plugin
 
+def valid_json(json):
+    #Check that we have the basic properties in place. 
+    #We can't check if the data is correct as this is plugin specific
+    if not isinstance(json,dict):
+        Logger().error("Command is not a dictionary")
+        return False
+    if 'name' not in json.keys():
+        Logger().error("No 'name' key was found in the command")
+        return False
+    if 'data' not in json.keys():
+        return False
+    if json['type'] not in ['sync','async']:
+        return False
+    return True
+    
+
 def commandReceived(self, jsondata):
     '''Called when a command is received. It parses the json and calls the correct plugin passing in the data.'''
     global listener
-    Logger().info("JSON RECEIVED: " + str(jsondata))
-    data = json.loads(jsondata)
-    Logger().info("PARSED DATA: " + str(data))
-    pluginName = data['name']
-    plugin = getPlugin(pluginName)
+    try:
+        data = json.loads(jsondata)
+    except Exception, e:
+        Logger().error("Invalid JSON string: " + jsondata)
+        #No point in going any further
+        return
+    Logger().info("Parsed: " + str(data))
+    if not valid_json(data):
+        Logger().error("Command was not valid")
+        return
+    
+    if 'type' not in json.keys():
+        Logger().warning("No 'type' key was found in the command. Assuming sync")
+        json['type'] = 'sync'
+    
+    try:
+        pluginName = data['name']
+        plugin = getPlugin(pluginName)
+    except Exception, e:
+        Logger().error("Unable to get plugin")
+        return
     if plugin != None:
         plugin.run(callback,data['data'])
+    else:
+        Logger().error("Plugin '" + pluginName + "' not found")
         
 def connectionFormed(self):
     '''Called when a new connection is formed.'''
@@ -60,8 +94,8 @@ def main():
             Logger().error('No listener specified')
             sys.exit(0)
     else:
-        Logger().warning('No arguement specified, defaulting to SocketListener()')
-        listener = SocketListener()
+        Logger().warning('No arguement specified, defaulting to SSHListener()')
+        listener = SSHListener()
     while(True):
         #We want this to start running again
         try:
