@@ -71,7 +71,10 @@ def commandReceived(self, jsondata):
             callback("",4,{"error":str(e.__class__) + ": " + str(e)})
             Logger().error("Plugin run failed: " + str(e.__class__) + ': ' + str(e))
     else:
-        callback("",3,{"error":"Plugin not found"})
+        if pluginName != None and pluginName != "":
+            callback(pluginName,3,{"error":"Plugin not found"})
+        else:
+            callback("",3,{"error":"Plugin not found"})
         Logger().error("Plugin '" + pluginName + "' not found")
         
 def connectionFormed(self):
@@ -91,13 +94,17 @@ def callback(plugin,code,values):
     #4 - Command unsuccessful
     if values == None:
         values = ""
-    listener.sendResponse({"plugin":plugin.id,"code":code,"values":values})
+    if type(plugin) == str:
+        listener.sendResponse({"plugin":plugin,"code":code,"values":values})
+    else:
+        listener.sendResponse({"plugin":plugin.id,"code":code,"values":values})
 
 listener = None
     
 def main():
     '''Main method which loads a listener and starts it'''
     global listener
+    
     if(len(sys.argv) > 1):
         if(sys.argv[1] == 'socket'):
             Logger().info('Creating SocketListener()')
@@ -110,7 +117,7 @@ def main():
             sys.exit(1)
     else:
         Logger().warning('No argument specified, defaulting to SSHListener()')
-        listener = SSHListener()
+        listener = SSHListener(password="pass")
     while(True):
         #We want this to start running again should it fail
         try:

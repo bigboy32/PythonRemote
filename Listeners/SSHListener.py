@@ -9,17 +9,41 @@ import traceback
 import paramiko
 from CreationExceptions import ListenerCreationException
 from Utilities import *
+import string
+import sys
+from paramiko import RSAKey
 
-import paramiko
+class RSAKeygen(object):
+
+    def generate(self):
+
+        bits = 4096
+        filename = "remote.key"
+        
+        # generating private key
+        Logger().info("Generating key pair. This can take up to a minute.")
+        prv = RSAKey.generate(bits=bits)
+        prv.write_private_key_file(filename)
+        Logger().info("Key pair generation complete.")
+
+        # generating public key
+        pub = RSAKey(filename=filename)
+        with open("%s.pub" % filename, 'w') as f:
+            f.write("%s %s" % (pub.get_name(), pub.get_base64()))
+
+        hash = hexlify(pub.get_fingerprint())
+        Logger().info("Fingerprint: %d %s %s.pub (%s)" % (bits, ":".join([ hash[i:2+i] for i in range(0, len(hash), 2)]), filename, "RSA"))
 
 
 class ParamikoServer(paramiko.ServerInterface):
 
-    def __init__(self):
-        self.publickey = 'AAAAB3NzaC1yc2EAAAADAQABAAABAQDhDyRaRUj11xjiTsWoeGFl5Nwj9mExkS+ewygltgBpAbiqBJm/7Slw43tHROvs0oNqiSee5lZNqHxV/m/uy8Xtd+BVIf/eWhvS8ySNk0hAwxJ5h9DVMTYag/ssXuRiPyml6u7BYW2PH6n7Zi6M0blhu59olXXTQTyR50nboQCvFG7q7TW7/stUhD/H4XuqD0GlEoV9l1iQxww+dX8fGHh+XSbTZLEJEG3fBQABEdocV7fdoE5t8lhnaC1a3i20rAReVSe7aYDpaZ9lPQh9WTHF260xcZ4qMybZASJ7vWzf9K9DEIChJ8bUu4Y1p9492BKAy16grIoK34glxmuYkIax'
+    def __init__(self, username, password):
+        with open('remote.key.pub') as f:
+            pubkey = f.readlines()
+        self.publickey = pubkey[0].replace('ssh-rsa ','')
         self.publickey = paramiko.RSAKey(data=base64.decodestring(self.publickey))
-        self.username = "velox"
-        self.password = "pass"
+        self.username = username
+        self.password = password
         self.event = threading.Event()
 
     def check_channel_request(self, kind, chanid):
@@ -28,6 +52,7 @@ class ParamikoServer(paramiko.ServerInterface):
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
     def check_auth_password(self, username, password):
+        Logger().info("Checking username: " + username + " and password: " + password)
         if (username == self.username) and (password == self.password):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
@@ -39,8 +64,10 @@ class ParamikoServer(paramiko.ServerInterface):
         return paramiko.AUTH_FAILED
 
     def get_allowed_auths(self, username):
-        #TODO: Probably limit this to public key only. Password is useful for testing
-        return 'password,publickey'
+        if self.password == "":
+            return 'publickey'
+        else:
+            return 'password,publickey'
 
     def check_channel_shell_request(self, channel):
         self.event.set()
@@ -53,8 +80,15 @@ class ParamikoServer(paramiko.ServerInterface):
 class SSHListener(Listener):
     '''An implementation of the listener class which listens for data using SSH.'''
     
-    def __init__(self):
+    def __init__(self,username="Velox",password=""):
         Listener.__init__(self)
+        self.username = username
+        self.password = password
+        if not os.path.isfile("remote.key"):
+            Logger().warning("No public key detected. Generating key pair.")
+            kg = RSAKeygen()
+            kg.generate()
+            
         self.privatekey = paramiko.RSAKey(filename='remote.key')
         Logger().info('Read key: ' + hexlify(self.privatekey.get_fingerprint()))
     
@@ -89,7 +123,7 @@ class SSHListener(Listener):
             Logger().error('Failed to load moduli -- gex will be unsupported.')
             raise
         self.transport.add_server_key(self.privatekey)
-        self.server = ParamikoServer()
+        self.server = ParamikoServer(self.username,self.password)
         try:
             self.transport.start_server(server=self.server)
         except paramiko.SSHException, x:
@@ -107,8 +141,9 @@ class SSHListener(Listener):
             # wait for auth
             self.chan = self.transport.accept(20)
             if self.chan is None:
-                Logger().error('No channel.')
-                raise Exception("No channel")
+                Logger().error('Client error')
+                self.close()
+                return
             
             Logger().info('Authenticated!')
 
@@ -133,12 +168,15 @@ class SSHListener(Listener):
             except:
                 pass
             raise
-        
-    def quit(self):
+            
+    def close(self):
         try:
             self.chan.close()
             self.transport.close()
         except:
             pass
+            
+    def quit(self):
+        self.close()
         Logger().info("quitting")
         
