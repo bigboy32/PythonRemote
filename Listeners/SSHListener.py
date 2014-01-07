@@ -107,7 +107,7 @@ class SSHListener(Listener):
             raise
 
         try:
-            self.sock.listen(100)
+            self.sock.listen(1)
             Logger().info('Listening for connection')
             self.client, self.addr = self.sock.accept()
         except Exception, e:
