@@ -116,8 +116,8 @@ def main():
             Logger().error('Invalid listener. Quitting.')
             sys.exit(1)
     else:
-        Logger().warning('No argument specified, defaulting to SSHListener()')
-        listener = SSHListener(password="pass")
+        Logger().warning('No argument specified, defaulting to SocketListener()')
+        listener = SocketListener()
     while(True):
         #We want this to start running again should it fail
         try:
@@ -131,5 +131,3 @@ def main():
     
 if __name__ == '__main__':
      main() 
-
-    

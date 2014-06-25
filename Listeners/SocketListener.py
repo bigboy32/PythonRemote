@@ -30,7 +30,7 @@ class SocketListener(Listener):
     def run(self, connectionFormed, commandReceived):
         PluginResponse.commandReceived = commandReceived
         PluginResponse.connectionFormed = connectionFormed
-        reactor.listenTCP(22001, PluginListenerFactory())
+        reactor.listenTCP(22000, PluginListenerFactory())
         reactor.run()
         
     def quit(self):
