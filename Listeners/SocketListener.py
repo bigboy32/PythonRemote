@@ -27,9 +27,9 @@ class SocketListener(Listener):
     def sendResponse(self, response):
         Logger().info("SENDING RESPONSE: " + str(response))
         
-    def run(self, connectionFormed, commandReceived):
-        PluginResponse.commandReceived = commandReceived
-        PluginResponse.connectionFormed = connectionFormed
+    def run(self, connection_formed, command_received):
+        PluginResponse.commandReceived = command_received
+        PluginResponse.connectionFormed = connection_formed
         reactor.listenTCP(22000, PluginListenerFactory())
         reactor.run()
         

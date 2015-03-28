@@ -6,7 +6,7 @@ import time
 #This can be emulated with: echo '{"name":"power_manager","type":"sync","data":{"option":"sleep"}}' | nc localhost 22001
 
 HOST = 'localhost'
-PORT = 22001
+PORT = 22000
  
 try:
   sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,7 +26,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'test':
     p['data'] = {'title':'test title', 'message':'This is a test message', 'type':'ok'}
     sock.send(json.dumps(p))
     time.sleep(0.2)
-    p = {'name':'quit','type':'sync'}
+    p = {'name':'server','type':'sync','data':{'command':'quit'}}
 else :
     print "Enter plugin name: ",
     p = {'name':raw_input(),'type':'sync'}
