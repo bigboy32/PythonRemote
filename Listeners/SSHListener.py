@@ -1,25 +1,22 @@
-from Listener import Listener
 import base64
 from binascii import hexlify
 import os
 import socket
-import sys
 import threading
 import traceback
+
 import paramiko
-from CreationExceptions import ListenerCreationException
-from Utilities import *
-import string
-import sys
 from paramiko import RSAKey
 
+from Listener import Listener
+from Utilities import *
+
+
 class RSAKeygen(object):
-
     def generate(self):
-
         bits = 4096
         filename = "remote.key"
-        
+
         # generating private key
         Logger().info("Generating key pair. This can take up to a minute.")
         prv = RSAKey.generate(bits=bits)
@@ -32,15 +29,15 @@ class RSAKeygen(object):
             f.write("%s %s" % (pub.get_name(), pub.get_base64()))
 
         hash = hexlify(pub.get_fingerprint())
-        Logger().info("Fingerprint: %d %s %s.pub (%s)" % (bits, ":".join([ hash[i:2+i] for i in range(0, len(hash), 2)]), filename, "RSA"))
+        hex_hash = ":".join([hash[i:2 + i] for i in range(0, len(hash), 2)])
+        Logger().info("Fingerprint: %d %s %s.pub (%s)" % (bits, hex_hash, filename, "RSA"))
 
 
 class ParamikoServer(paramiko.ServerInterface):
-
     def __init__(self, username, password):
         with open('remote.key.pub') as f:
             pubkey = f.readlines()
-        self.publickey = pubkey[0].replace('ssh-rsa ','')
+        self.publickey = pubkey[0].replace('ssh-rsa ', '')
         self.publickey = paramiko.RSAKey(data=base64.decodestring(self.publickey))
         self.username = username
         self.password = password
@@ -76,11 +73,11 @@ class ParamikoServer(paramiko.ServerInterface):
     def check_channel_pty_request(self, channel, term, width, height, pixelwidth, pixelheight, modes):
         return True
 
-        
+
 class SSHListener(Listener):
     '''An implementation of the listener class which listens for data using SSH.'''
-    
-    def __init__(self,username="Velox",password=""):
+
+    def __init__(self, username="Velox", password=""):
         Listener.__init__(self)
         self.username = username
         self.password = password
@@ -88,14 +85,14 @@ class SSHListener(Listener):
             Logger().warning("No public key detected. Generating key pair.")
             kg = RSAKeygen()
             kg.generate()
-            
+
         self.privatekey = paramiko.RSAKey(filename='remote.key')
         Logger().info('Read key: ' + hexlify(self.privatekey.get_fingerprint()))
-    
+
     def sendResponse(self, response):
         Logger().info("Responding")
         self.chan.send(str(response))
-    
+
     def initiate_connection(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -114,7 +111,7 @@ class SSHListener(Listener):
             Logger().error('Listen/accept failed: ' + str(e))
             traceback.print_exc()
             raise
-    
+
     def setup_transport(self):
         self.transport = paramiko.Transport(self.client)
         try:
@@ -123,13 +120,13 @@ class SSHListener(Listener):
             Logger().error('Failed to load moduli -- gex will be unsupported.')
             raise
         self.transport.add_server_key(self.privatekey)
-        self.server = ParamikoServer(self.username,self.password)
+        self.server = ParamikoServer(self.username, self.password)
         try:
             self.transport.start_server(server=self.server)
         except paramiko.SSHException, x:
             Logger().error('SSH negotiation failed.')
             raise
-    
+
     def run(self, connection_formed, command_received):
 
         self.initiate_connection()
@@ -144,19 +141,19 @@ class SSHListener(Listener):
                 Logger().error('Client error')
                 self.close()
                 return
-            
+
             Logger().info('Authenticated!')
 
             self.server.event.wait(10)
 
-            #self.chan.send('You are connected to the server. Send your commands.\r\n')
+            # self.chan.send('You are connected to the server. Send your commands.\r\n')
             command = ''
             f = self.chan.makefile('rU')
-            while(True):
+            while (True):
                 command = f.readline().strip('\r').strip('\n')
                 if command == 'quit' or command == '':
                     break
-                command_received(self,command)
+                command_received(self, command)
                 self.chan.send("Received command\r\n")
             self.chan.close()
 
@@ -168,14 +165,14 @@ class SSHListener(Listener):
             except:
                 pass
             raise
-            
+
     def close(self):
         try:
             self.chan.close()
             self.transport.close()
         except:
             pass
-            
+
     def quit(self):
         self.close()
         Logger().info("quitting")

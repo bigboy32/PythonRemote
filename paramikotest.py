@@ -1,6 +1,5 @@
 import base64
 from binascii import hexlify
-import os
 import socket
 import sys
 import threading
@@ -9,9 +8,9 @@ import traceback
 import paramiko
 
 
-class Server (paramiko.ServerInterface):
-
+class Server(paramiko.ServerInterface):
     def __init__(self):
+        # noinspection PyPep8
         self.publickey = 'AAAAB3NzaC1yc2EAAAADAQABAAABAQDhDyRaRUj11xjiTsWoeGFl5Nwj9mExkS+ewygltgBpAbiqBJm/7Slw43tHROvs0oNqiSee5lZNqHxV/m/uy8Xtd+BVIf/eWhvS8ySNk0hAwxJ5h9DVMTYag/ssXuRiPyml6u7BYW2PH6n7Zi6M0blhu59olXXTQTyR50nboQCvFG7q7TW7/stUhD/H4XuqD0GlEoV9l1iQxww+dX8fGHh+XSbTZLEJEG3fBQABEdocV7fdoE5t8lhnaC1a3i20rAReVSe7aYDpaZ9lPQh9WTHF260xcZ4qMybZASJ7vWzf9K9DEIChJ8bUu4Y1p9492BKAy16grIoK34glxmuYkIax'
         self.publickey = paramiko.RSAKey(data=base64.decodestring(self.publickey))
         self.username = "velox"
@@ -44,7 +43,7 @@ class Server (paramiko.ServerInterface):
     def check_channel_pty_request(self, channel, term, width, height, pixelwidth, pixelheight, modes):
         return True
 
-        
+
 # setup logging
 
 privatekey = paramiko.RSAKey(filename='remote')
