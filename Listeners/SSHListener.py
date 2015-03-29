@@ -13,6 +13,7 @@ from Utilities import *
 
 
 class RSAKeygen(object):
+    # noinspection PyMethodMayBeStatic
     def generate(self):
         bits = 4096
         filename = "remote.key"
@@ -28,8 +29,8 @@ class RSAKeygen(object):
         with open("%s.pub" % filename, 'w') as f:
             f.write("%s %s" % (pub.get_name(), pub.get_base64()))
 
-        hash = hexlify(pub.get_fingerprint())
-        hex_hash = ":".join([hash[i:2 + i] for i in range(0, len(hash), 2)])
+        fingerprint_hash = hexlify(pub.get_fingerprint())
+        hex_hash = ":".join([fingerprint_hash[i:2 + i] for i in range(0, len(fingerprint_hash), 2)])
         Logger().info("Fingerprint: %d %s %s.pub (%s)" % (bits, hex_hash, filename, "RSA"))
 
 
@@ -75,12 +76,18 @@ class ParamikoServer(paramiko.ServerInterface):
 
 
 class SSHListener(Listener):
-    '''An implementation of the listener class which listens for data using SSH.'''
+    """An implementation of the listener class which listens for data using SSH."""
 
     def __init__(self, username="Velox", password=""):
         Listener.__init__(self)
         self.username = username
         self.password = password
+        self.sock = None
+        self.client = None
+        self.addr = None
+        self.server = None
+        self.transport = None
+        self.chan = None
         if not os.path.isfile("remote.key"):
             Logger().warning("No public key detected. Generating key pair.")
             kg = RSAKeygen()
@@ -89,7 +96,7 @@ class SSHListener(Listener):
         self.privatekey = paramiko.RSAKey(filename='remote.key')
         Logger().info('Read key: ' + hexlify(self.privatekey.get_fingerprint()))
 
-    def sendResponse(self, response):
+    def send_response(self, response):
         Logger().info("Responding")
         self.chan.send(str(response))
 
@@ -123,7 +130,7 @@ class SSHListener(Listener):
         self.server = ParamikoServer(self.username, self.password)
         try:
             self.transport.start_server(server=self.server)
-        except paramiko.SSHException, x:
+        except paramiko.SSHException:
             Logger().error('SSH negotiation failed.')
             raise
 
@@ -147,11 +154,10 @@ class SSHListener(Listener):
             self.server.event.wait(10)
 
             # self.chan.send('You are connected to the server. Send your commands.\r\n')
-            command = ''
             f = self.chan.makefile('rU')
-            while (True):
+            while True:
                 command = f.readline().strip('\r').strip('\n')
-                if command == 'quit' or command == '':
+                if command is None or command == 'quit' or command == '':
                     break
                 command_received(self, command)
                 self.chan.send("Received command\r\n")
@@ -160,6 +166,7 @@ class SSHListener(Listener):
         except Exception, e:
             Logger().error('Caught exception: ' + str(e.__class__) + ': ' + str(e))
             traceback.print_exc()
+            # noinspection PyBroadException
             try:
                 self.transport.close()
             except:
@@ -167,6 +174,7 @@ class SSHListener(Listener):
             raise
 
     def close(self):
+        # noinspection PyBroadException
         try:
             self.chan.close()
             self.transport.close()
@@ -176,4 +184,3 @@ class SSHListener(Listener):
     def quit(self):
         self.close()
         Logger().info("quitting")
-        

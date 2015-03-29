@@ -2,10 +2,12 @@ import os
 
 from Plugin import *
 from SystemInfo import *
+from StatusCode import *
+from Utilities import *
 
 
 class PowerManager(Plugin):
-    '''The first example class for the python powered remote interface for my computer'''
+    """The first example class for the python powered remote interface for my computer"""
 
     id = "power_manager"
 

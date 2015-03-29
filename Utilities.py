@@ -4,14 +4,15 @@ import logging
 class Singleton(type):
     _instances = {}
 
-    def __call__(self, *args, **kwargs):
-        if self not in self._instances:
-            self._instances[self] = super(Singleton, self).__call__(*args, **kwargs)
-        return self._instances[self]
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            # noinspection PyArgumentList
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
 
 
 class Logger(object):
-    '''Used for logging in this app'''
+    """Used for logging in this app"""
 
     __metaclass__ = Singleton
 
@@ -80,3 +81,19 @@ class Logger(object):
         :param kwargs: A named dictionary of parameters to be placed into the format string
         """
         self.logger.critical(msg, *args, **kwargs)
+
+
+def valid_json(json):
+    # Check that we have the basic properties in place.
+    # We can't check if the data is correct as this is plugin specific
+    if not isinstance(json, dict):
+        Logger().error("Command is not a dictionary")
+        return False
+    if 'name' not in json.keys():
+        Logger().error("No 'name' key was found in the command")
+        return False
+    if 'data' not in json.keys():
+        json["data"] = {}
+    if json['type'] not in ['sync', 'async']:
+        return False
+    return True

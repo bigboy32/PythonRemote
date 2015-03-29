@@ -13,7 +13,7 @@ PythonRemote is a python program which runs on your computer which remotes can c
 
 ###Planned Auth Method
 
-Every device will be authenticated using the pairing method as above. The connection will be secured using the SSH protocol. Server side, this will be done using paramiko.
+Every device will be authenticated using the pairing method as above. The connection will be secured using the SSH protocol. Server side, this will be done using Paramiko.
 
 ##Dependencies
 

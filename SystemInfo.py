@@ -2,21 +2,20 @@ import platform
 
 
 class SystemInfo(object):
-    '''A class for easily accessing all system information'''
+    """A class for easily accessing all system information"""
 
     @staticmethod
-    def get_OS():
+    def get_os():
         return platform.system()
 
     @staticmethod
     def is_windows():
-        return SystemInfo.get_OS() == "Windows"
+        return SystemInfo.get_os() == "Windows"
 
     @staticmethod
     def is_mac():
-        return SystemInfo.get_OS() == "Darwin"
+        return SystemInfo.get_os() == "Darwin"
 
     @staticmethod
     def is_linux():
-        return SystemInfo.get_OS() == "Linux"
-    
+        return SystemInfo.get_os() == "Linux"

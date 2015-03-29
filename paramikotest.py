@@ -22,18 +22,18 @@ class Server(paramiko.ServerInterface):
             return paramiko.OPEN_SUCCEEDED
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
-    def check_auth_password(self, username, password):
-        if (username == self.username) and (password == self.password):
+    def check_auth_password(self, supplied_username, supplied_password):
+        if (supplied_username == self.username) and (supplied_password == self.password):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
-    def check_auth_publickey(self, username, key):
+    def check_auth_publickey(self, supplied_username, key):
         print 'Auth attempt with key: ' + hexlify(key.get_fingerprint())
-        if (username == 'robey') and (key == self.publickey):
+        if (supplied_username == 'robey') and (key == self.publickey):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
-    def get_allowed_auths(self, username):
+    def get_allowed_auths(self, supplied_username):
         return 'password,publickey'
 
     def check_channel_shell_request(self, channel):
@@ -71,6 +71,8 @@ except Exception, e:
     sys.exit(1)
 
 print 'Got a connection!'
+
+t = None
 
 try:
     t = paramiko.Transport(client)
@@ -111,8 +113,10 @@ try:
 except Exception, e:
     print '*** Caught exception: ' + str(e.__class__) + ': ' + str(e)
     traceback.print_exc()
+    # noinspection PyBroadException
     try:
-        t.close()
+        if t is not None:
+            t.close()
     except:
         pass
     sys.exit(1)

@@ -3,7 +3,7 @@ import sys
 import json
 import time
 
-# This can be emulated with: echo '{"name":"power_manager","type":"sync","data":{"option":"sleep"}}' | nc localhost 22001
+# This can be emulated: echo '{"name":"power_manager","type":"sync","data":{"option":"sleep"}}' | nc localhost 22001
 
 HOST = 'localhost'
 PORT = 22001
@@ -21,8 +21,8 @@ except socket.error, msg:
     sys.exit(2)
 
 if len(sys.argv) > 1 and sys.argv[1] == 'test':
-    p = {'name': 'messager', 'type': 'sync'}
-    p['data'] = {'title': 'test title', 'message': 'This is a test message', 'type': 'ok'}
+    p = {'name': 'messager', 'type': 'sync',
+         'data': {'title': 'test title', 'message': 'This is a test message', 'type': 'ok'}}
     sock.send(json.dumps(p))
     time.sleep(0.2)
     p = {'name': 'quit', 'type': 'sync'}
@@ -41,8 +41,8 @@ else:
         params[k] = v
         k, v = raw_input(), raw_input()
     p['data'] = params
+
 sock.send(json.dumps(p))
-#sock.send(json.dumps({'name':'quit'}))
 
 sock.close()
 

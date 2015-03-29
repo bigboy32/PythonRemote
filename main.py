@@ -1,5 +1,4 @@
 import json
-import sys
 import inspect
 
 from Plugins import *
@@ -33,14 +32,7 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
         Informs the listener to begin listening
         :type self: PycmoteServer
         """
-        self.listener.run(self.connectionFormed, self.commandReceived)
-
-    def hodor(self, asdasd):
-        """
-
-        :param asdasd:
-        """
-        pass
+        self.listener.run(self.connection_formed, self.command_received)
 
     def run(self, callback, args):
         """
@@ -60,7 +52,7 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
             callback(self, StatusCode.status_dict(StatusCode.UNSUPPORTED_COMMAND))
 
     def get_plugin(self, name):
-        '''Returns an instance of the plugin specified by the name passed in'''
+        """Returns an instance of the plugin specified by the name passed in"""
         Logger().info("Plugin requested: " + name)
 
         # Load all plugins if we need to
@@ -82,31 +74,16 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
                 requested_plugin["activated"] = True
 
             return requested_plugin["plugin"]
-        except KeyError, e:
+        except KeyError:
             Logger().info("Plugin '" + name + "' not found.")
             return None
 
-    def valid_json(self, json):
-        # Check that we have the basic properties in place.
-        # We can't check if the data is correct as this is plugin specific
-        if not isinstance(json, dict):
-            Logger().error("Command is not a dictionary")
-            return False
-        if 'name' not in json.keys():
-            Logger().error("No 'name' key was found in the command")
-            return False
-        if 'data' not in json.keys():
-            json["data"] = {}
-        if json['type'] not in ['sync', 'async']:
-            return False
-        return True
-
-    def commandReceived(self, jsondata):
-        '''Called when a command is received. It parses the json and calls the correct plugin passing in the data.'''
+    def command_received(self, json_data):
+        """Called when a command is received. It parses the json and calls the correct plugin passing in the data."""
         try:
-            data = json.loads(jsondata)
-        except Exception, e:
-            Logger().error("Invalid JSON string: " + jsondata)
+            data = json.loads(json_data)
+        except ValueError:
+            Logger().error("Invalid JSON string: " + json_data)
             # No point in going any further
             self.callback(self, StatusCode.status_dict(StatusCode.INVALID_JSON))
             return
@@ -114,17 +91,12 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
         if 'type' not in data.keys():
             Logger().warning("No 'type' key was found in the command. Assuming sync")
             data['type'] = 'sync'
-        if not self.valid_json(data):
+        if not valid_json(data):
             Logger().error("Command was not valid")
             self.callback(self, StatusCode.status_dict(StatusCode.INVALID_JSON))
             return
 
-        try:
-            plugin = self.get_plugin(data["name"])
-        except Exception, e:
-            Logger().error("Unable to get plugin")
-            self.callback(self, StatusCode.status_dict(StatusCode.PLUGIN_NOT_FOUND))
-            return
+        plugin = self.get_plugin(data["name"])
 
         if plugin is None:
             self.callback(self, StatusCode.status_dict(StatusCode.PLUGIN_NOT_FOUND))
@@ -138,30 +110,30 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
             self.callback(plugin, StatusCode.status_dict(StatusCode.PLUGIN_ERROR_UNKNOWN))
             Logger().error("Plugin run failed: " + str(e.__class__) + ': ' + str(e))
 
-    def connectionFormed(self):
-        '''Called when a new connection is formed.'''
+    def connection_formed(self):
+        """Called when a new connection is formed."""
         self.callback(self, StatusCode.status_dict(StatusCode.CONNECTION_FORMED))
         Logger().info("Client connection")
 
     def callback(self, plugin, status, values=None):
-        '''The callback method provided to the plugin so that the response can be issued.'''
+        """The callback method provided to the plugin so that the response can be issued."""
         if values is None:
             values = ""
         if type(plugin) == str:
-            self.listener.sendResponse({"plugin": plugin, "status": status, "values": values})
+            self.listener.send_response({"plugin": plugin, "status": status, "values": values})
         else:
-            self.listener.sendResponse({"plugin": plugin.id, "status": status, "values": values})
+            self.listener.send_response({"plugin": plugin.id, "status": status, "values": values})
 
 
 def main():
-    '''Main method which loads a listener and starts it'''
+    """Main method which loads a listener and starts it"""
     server = PycmoteServer()
     socket_port = 22001
-    if (len(sys.argv) > 1):
-        if (sys.argv[1] == 'socket'):
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'socket':
             Logger().info('Creating SocketListener()')
             server.set_listener(SocketListener(socket_port))
-        elif (sys.argv[1] == 'ssh'):
+        elif sys.argv[1] == 'ssh':
             Logger().info('Creating SSHListener()')
             server.set_listener(SSHListener())
         else:
@@ -171,7 +143,7 @@ def main():
         Logger().warning('No argument specified, defaulting to SocketListener()')
         server.set_listener(SocketListener(socket_port))
 
-    while (True):
+    while True:
         # We want this to start running again should it fail
         try:
             Logger().info("Running listener")
