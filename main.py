@@ -128,7 +128,7 @@ class PycmoteServer(Plugin):  # We are also a plugin as we can then respond and 
 def main():
     """Main method which loads a listener and starts it"""
     server = PycmoteServer()
-    socket_port = 22001
+    socket_port = 22000
     if len(sys.argv) > 1:
         if sys.argv[1] == 'socket':
             Logger().info('Creating SocketListener()')

@@ -25,7 +25,7 @@ class Messager(Plugin):
             window.geometry("1x1+" + str(window.winfo_screenwidth() / 2) + "+" + str(window.winfo_screenheight() / 2))
             # noinspection PyProtectedMember
             answer = tkMessageBox._show(type=args['type'], title=args['title'], message=args['message'], icon=None, )
-            callback(self, StatusCode.SUCCESS, {"answer": answer})
+            callback(self, StatusCode.status_dict(StatusCode.SUCCESS), {"answer": answer})
         else:
             callback(self, StatusCode.UNSUPPORTED_OS, None)
             Logger().critical('Unsupported OS')

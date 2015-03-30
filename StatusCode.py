@@ -52,5 +52,5 @@ class StatusCode(object):
             "type": "error" if status_code < 0 else "info",
             "code": status_code,
             "message": StatusCode.status_message(status_code),
-            "further_info": None
+            "further_info": ""
         }

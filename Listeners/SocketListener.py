@@ -1,7 +1,7 @@
 from twisted.internet import protocol, reactor
 from Listener import Listener
 from Utilities import *
-
+import json
 
 class PluginResponse(protocol.Protocol):
 
@@ -20,10 +20,12 @@ class PluginResponse(protocol.Protocol):
 
 class PluginListenerFactory(protocol.Factory):
     def __init__(self):
-        pass
+        self.responders = []
 
     def buildProtocol(self, address):
-        return PluginResponse()
+        response = PluginResponse()
+        self.responders.append(response)
+        return response
 
 
 class SocketListener(Listener):
@@ -35,12 +37,14 @@ class SocketListener(Listener):
 
     def send_response(self, response):
         Logger().info("SENDING RESPONSE: " + str(response))
+        self.plugin_listener_factory.responders[0].transport.write(json.dumps(response))
 
     def run(self, connection_formed, command_received):
         PluginResponse.commandReceived = command_received
         PluginResponse.connectionFormed = connection_formed
+        self.plugin_listener_factory = PluginListenerFactory()
         # noinspection PyUnresolvedReferences
-        reactor.listenTCP(self.port, PluginListenerFactory())
+        reactor.listenTCP(self.port, self.plugin_listener_factory)
         # noinspection PyUnresolvedReferences
         reactor.run()
 
